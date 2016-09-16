@@ -71,9 +71,15 @@ h = sigmoid(h1*Theta2'); % shape (m, num_labels)
 y2 = (y == 1:num_labels);  %  one-hot encode y
 J = sum((-y2.*log(h)-(1-y2).*log(1-h))(:))/m/num_labels;
 
+%  Skip all theta0 in regularization
+Theta_reg1 = Theta1;
+Theta_reg1(:,1) = zeros(hidden_layer_size,1);
+reg1 = sum((Theta_reg1.^2)(:));
+Theta_reg2 = Theta2;
+Theta_reg2(:,1) = zeros(num_labels,1);
+reg2 = sum((Theta_reg2.^2)(:));
 
-
-
+J = J + lambda/2/m*(reg1 + reg2);
 
 
 
