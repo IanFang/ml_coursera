@@ -61,17 +61,17 @@ Theta2_grad = zeros(size(Theta2));
 %               the regularization separately and then add them to Theta1_grad
 %               and Theta2_grad from Part 2.
 %
-
-X = [ones(m, 1) X];
-h1 = sigmoid(X*Theta1');
-h1 = [ones(m, 1) h1];
-h = sigmoid(h1*Theta2'); % shape (m, num_labels)
+a1 = X;
+z2 = [ones(m, 1) a1]*Theta1';
+a2 = sigmoid(z2);  %  shape (m, hidden_layer_size)
+z3 = [ones(m, 1) a2]*Theta2';
+a3 = sigmoid(z3);  %  shape (m, num_labels)
 
 %  calculate J vectorized
-y2 = (y == 1:num_labels);  %  one-hot encode y
-J = sum((-y2.*log(h)-(1-y2).*log(1-h))(:))/m/num_labels;
+y = (y == 1:num_labels);  %  one-hot encode y, shape (m, num_labels)
+J = sum((-y.*log(a3)-(1-y).*log(1-a3))(:))/m;
 
-%  Skip all theta0 in regularization
+%  add regularization, skip all theta0 in calculation
 Theta_reg1 = Theta1;
 Theta_reg1(:,1) = zeros(hidden_layer_size,1);
 reg1 = sum((Theta_reg1.^2)(:));
@@ -81,22 +81,13 @@ reg2 = sum((Theta_reg2.^2)(:));
 
 J = J + lambda/2/m*(reg1 + reg2);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+%  calculate gradients
+delta3 = a3 - y;  %  shape (m, num_labels);
+delta2 = (delta3*Theta2)(:,2:end).*sigmoidGradient(z2);  %  shape (m, hidden_layer_size)
+Delta1 = delta2'*[ones(m,1) a1];
+Delta2 = delta3'*[ones(m,1) a2];
+Theta1_grad = 1/m*Delta1 + lambda/m*Theta_reg1;
+Theta2_grad = 1/m*Delta2 + lambda/m*Theta_reg2;
 
 
 % -------------------------------------------------------------
